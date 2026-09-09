@@ -92,7 +92,6 @@ terraform apply
 
 Key variables (see `terraform/variables.tf`) — override with `-var` or `TF_VAR_*` env vars as needed: `region`, `vpc_cidr_block`, `subnet_cidr_block`, `avail_zone`, `env_prefix`, `my_ip_address`, `jenkins_ip_address`, `instance_type`.
 
-> **Note:** `my_ip_address` and `jenkins_ip_address` are hardcoded to specific IPs in `variables.tf` — update these to match your own environment before applying.
 
 ## CI/CD Pipeline (Jenkinsfile)
 
@@ -115,7 +114,7 @@ docker-compose -f docker-compose.yaml up --detach
 ```
 
 This starts two containers:
-- `java-maven-app` — the Spring Boot app, exposed on port `8080`
-- `postgres-db` — PostgreSQL, exposed on port `5432`
+- `java-maven-app`: the Spring Boot app, exposed on port `8080`
+- `postgres-db`: PostgreSQL, exposed on port `5432`
 
 
