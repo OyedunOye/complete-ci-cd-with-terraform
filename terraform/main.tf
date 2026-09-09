@@ -1,4 +1,12 @@
-# region, access_key and secret_key were configured in ~/.aws/credentials file
+terraform {
+    required_version = ">= 0.12"
+    backend "s3" {
+        bucket = "oyedun-my-app-tf-s3-bucket"
+        key = "my-app/state.tfstate"
+        region = "us-east-1"
+    }
+}
+
 provider "aws" {
     region = var.region
 }
