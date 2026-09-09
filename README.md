@@ -117,4 +117,9 @@ This starts two containers:
 - `java-maven-app`: the Spring Boot app, exposed on port `8080`
 - `postgres-db`: PostgreSQL, exposed on port `5432`
 
+## Screenshots
+![successful jenkin ci cd run](https://res.cloudinary.com/dpav6x91z/image/upload/v1788936877/Screenshot_2026-09-09_063853_hj1gwk.png)
 
+![verified infra provisioned and app deployed](https://res.cloudinary.com/dpav6x91z/image/upload/v1788936906/Screenshot_2026-09-09_070643_m7om2p.png)
+
+![access deployed app in browser](https://res.cloudinary.com/dpav6x91z/image/upload/v1788936939/Screenshot_2026-09-09_070525_w08lus.png)
