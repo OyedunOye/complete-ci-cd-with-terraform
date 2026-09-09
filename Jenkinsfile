@@ -111,7 +111,7 @@ pipeline {
                         sh 'git config --global user.name "Jenkins"'
 
                         sh "git remote set-url origin https://${USER}:${PASS}@github.com/OyedunOye/complete-ci-cd-with-terraform.git"
-                        sh 'git add .'
+                        sh 'git add pom.xml'
                         sh 'git commit -m "ci:version bump from successful Jenkins build"'
                         sh "git push origin HEAD:${BRANCH_NAME}"
                     }
