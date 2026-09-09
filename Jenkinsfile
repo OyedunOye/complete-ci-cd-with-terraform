@@ -58,15 +58,44 @@ pipeline {
             }
         }
 
-        stage("deploy") {
+        stage("provision server"){
+            environment {
+                AWS_ACCESS_KEY_ID = credentials("jenkins-aws-access-key-id")
+                AWS_SECRET_ACCESS_KEY = credentials(" jenkins-secret-access-key ")
+                TF_VAR_env_prefix = 'test'
+            }
             steps {
                 script {
+                    dir('terraform') {
+                        sh "terraform init"
+                        sh "terraform apply --auto-approve"
+                        EC2_PUBLIC_IP = sh (
+                            script: "terraform output ec2-public_ip",
+                            returnStdout: true
+                        ).trim()
+                    }
+                }
+            }
+        }
+
+        stage("deploy") {
+            environment {
+                DOCKER_CREDENTIALS = credentials("docker-credentials")
+            }
+            steps {
+                script {
+                    // buffer for initialization of server and execution of entry-script.sh
+                    echo 'waiting for EC2 server to initialize'
+                    sleep(time: 90, unit: "SECONDS")
+
                     echo 'deploying docker image to EC2'
-                    def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME}"
-                    def ec2Instance = "ec2-user@13.218.153.53"
+                    echo "${EC2_PUBLIC_IP}"
+
+                    def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME} ${DOCKER_CREDENTIALS_PSW} ${DOCKER_CREDENTIALS_USR}"
+                    def ec2Instance = "ec2-user@${EC2_PUBLIC_IP}"
                     sshagent(credentials: ['ec2-server-key'], executable: '') {
-                        sh "scp docker-compose.yaml ${ec2Instance}:/home/ec2-user"
-                        sh "scp server-cmds.sh ${ec2Instance}:/home/ec2-user"
+                        sh "scp -o StrictHostKeyChecking=no docker-compose.yaml ${ec2Instance}:/home/ec2-user"
+                        sh "scp -o StrictHostKeyChecking=no server-cmds.sh ${ec2Instance}:/home/ec2-user"
                         sh "ssh -o StrictHostKeyChecking=no ${ec2Instance} ${shellCmd}"
                     }
                 }
