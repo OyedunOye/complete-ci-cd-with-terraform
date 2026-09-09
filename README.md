@@ -1,4 +1,4 @@
-# CI/CD with Terraform
+# CI/CD with Terraform and Remote State Configured
 
 A Spring Boot demo application with a full Jenkins CI/CD pipeline that builds, versions, containerizes, provisions AWS infrastructure with Terraform, and deploys the app to an EC2 instance via Docker Compose.
 
@@ -123,3 +123,22 @@ This starts two containers:
 ![verified infra provisioned and app deployed](https://res.cloudinary.com/dpav6x91z/image/upload/v1788936906/Screenshot_2026-09-09_070643_m7om2p.png)
 
 ![access deployed app in browser](https://res.cloudinary.com/dpav6x91z/image/upload/v1788936939/Screenshot_2026-09-09_070525_w08lus.png)
+
+## Remote Backend
+To access the current state and track changes made to resources created by terraform, a remote state is set up in `/terraform/main.tf`. The remote storage chosen for this project is aws s3 bucket. This is done in 2 simple steps:
+- In terraform block at the beginning of main.tf, configure a remote backend of choice.
+- Create a remote storage for the chosen remote backend provider (aws s3 bucket in my case)
+Commit and push changes to trigger ci/cd pipeline and then from the terminal when in the directory with the terraform configuration files, initialize the backend by running the command:
+```bash
+terraform init
+```
+- After initializing backend, access state using terraform command from the terminal. For instance:
+```bash
+terraform state list
+```
+
+![pipeline success](https://res.cloudinary.com/dpav6x91z/image/upload/v1788939563/Screenshot_2026-09-09_093815_qmsjqs.png)
+![access remote state from local terminal](https://res.cloudinary.com/dpav6x91z/image/upload/v1788938509/Screenshot_2026-09-09_092119_xntm8n.png)
+![ssh into ec2 instance from browser](https://res.cloudinary.com/dpav6x91z/image/upload/v1788940185/Screenshot_2026-09-09_094759_xspd9f.png)
+![access deployed app in browser](https://res.cloudinary.com/dpav6x91z/image/upload/v1788940188/Screenshot_2026-09-09_094913_sopoqn.png)
+**Note:** Other terraform commands are also accessible locally and they use the remote state for performing their functions.
