@@ -63,6 +63,7 @@ pipeline {
                 AWS_ACCESS_KEY_ID = credentials("jenkins-aws-access-key-id")
                 AWS_SECRET_ACCESS_KEY = credentials(" jenkins-secret-access-key ")
                 TF_VAR_env_prefix = 'test'
+                TF_VAR_my_ip_address = credentials("my-pc-ip-address")
             }
             steps {
                 script {
@@ -70,7 +71,7 @@ pipeline {
                         sh "terraform init"
                         sh "terraform apply --auto-approve"
                         EC2_PUBLIC_IP = sh (
-                            script: "terraform output ec2-public_ip",
+                            script: "terraform output -raw ec2-public_ip",
                             returnStdout: true
                         ).trim()
                     }
@@ -91,12 +92,15 @@ pipeline {
                     echo 'deploying docker image to EC2'
                     echo "${EC2_PUBLIC_IP}"
 
-                    def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME} ${DOCKER_CREDENTIALS_PSW} ${DOCKER_CREDENTIALS_USR}"
+                    def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME} ${DOCKER_CREDENTIALS_USR}"
                     def ec2Instance = "ec2-user@${EC2_PUBLIC_IP}"
                     sshagent(credentials: ['ec2-server-key'], executable: '') {
                         sh "scp -o StrictHostKeyChecking=no docker-compose.yaml ${ec2Instance}:/home/ec2-user"
                         sh "scp -o StrictHostKeyChecking=no server-cmds.sh ${ec2Instance}:/home/ec2-user"
-                        sh "ssh -o StrictHostKeyChecking=no ${ec2Instance} ${shellCmd}"
+
+                        // pipe the Docker password over ssh stdin; printf is a shell builtin, so the password never shows in ps on Jenkins or EC2
+                        sh "printf '%s\\n' \"\$DOCKER_CREDENTIALS_PSW\" | ssh -o StrictHostKeyChecking=no ${ec2Instance} ${shellCmd}"
+
                     }
                 }
             }
@@ -110,7 +114,7 @@ pipeline {
                         sh 'git config --global user.email "jenkins@example.com"'
                         sh 'git config --global user.name "Jenkins"'
 
-                        sh "git remote set-url origin https://${USER}:${PASS}@github.com/OyedunOye/complete-ci-cd-with-terraform.git"
+                        sh 'git remote set-url origin https://${USER}:${PASS}@github.com/OyedunOye/complete-ci-cd-with-terraform.git'
                         sh 'git add pom.xml'
                         sh 'git commit -m "ci:version bump from successful Jenkins build"'
                         sh "git push origin HEAD:${BRANCH_NAME}"

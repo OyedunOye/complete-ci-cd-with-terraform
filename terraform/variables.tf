@@ -13,9 +13,7 @@ variable "avail_zone" {
 variable "env_prefix" {
     default = "dev"
 }
-variable "my_ip_address" {
-    default = "93.159.0.0/16"
-}
+variable "my_ip_address" {}
 variable "jenkins_ip_address" {
     default = "178.105.179.238/32"
 }
